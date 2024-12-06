@@ -23,8 +23,8 @@ double PWM = 0;
 double BASE_PWM;
 // 17, 1.8 work for sure, so do 17.8, 2.4 for balance
 // 14, 3, 11(constant pwm) work for going forward at constant speed, not smooth tho
-// 17, 2.4, 5.5(constant pwm) works better
-double Kp = 18, Ki = 2.54, Kd = 1;
+// 18, 2.4, 5.5(constant pwm) works better
+double Kp = 17, Ki = 1.8, Kd = 1;
 
 double error = 0, errorSum = 0, currentAngle = 0, prevAngle = 0, targetAngle = 0;
 sensors_event_t a, g, temp;
@@ -130,7 +130,7 @@ void Timer() {
   errorSum += error;
   
   //errorSum = constrain(errorSum, -1000.0, 1000.0);
-  PWM = 5.5 + BASE_PWM + Kp*(error) + Ki*(errorSum); //+ Kd*(currentAngle-prevAngle);
+  PWM = BASE_PWM + Kp*(error) + Ki*(errorSum); //+ Kd*(currentAngle-prevAngle);
   // Serial.print("PWM:");
   // Serial.println(PWM);
   // prevAngle = currentAngle;
