@@ -73,8 +73,10 @@ void loop() {
 }
 
 void Timer() {
-  double CORRECTION_FACTOR = -2.8;
-  double ANGLE_MULTIPLIER = -230.0;
+  // Constants determined empirically from testing balancing performance
+  // and printing MPU data.
+  double CORRECTION_FACTOR = -2.8; // keep stable y velocity at zero
+  double ANGLE_MULTIPLIER = -230.0; // keep error within PWM range [-900, 900]
   // calculate PID values and update PWM
   mpu.getEvent(&a, &g, &temp);
 
@@ -87,7 +89,7 @@ void Timer() {
   else {
     BASE_PWM = -50;
   }
-  
+
   error = ANGLE_MULTIPLIER * currentAngle + CORRECTION_FACTOR;
   errorSum += error;
   
