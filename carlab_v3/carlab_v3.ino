@@ -27,7 +27,7 @@ double BASE_PWM;
 // 17, 1.8 work for sure, so do 17.8, 2.4 for balance
 // 14, 3, 11(constant pwm) work for going forward at constant speed, not smooth tho
 // 18, 2.4, 5.5(constant pwm) works better
-double Kp = 12, Ki = 12, Kd = 0.00001;
+double Kp = 17, Ki = 1.74, Kd = 0.8;
 
 double gyroAngle = 0;
 double error = 0, errorSum = 0, currentAngle = 0, prevAngle = 0, targetAngle = 0;
@@ -79,7 +79,8 @@ void setMotors(double PWM) {
 
 // //delay between prints to xbee should be at least 5000 (can get away with like 2500 but will have some missing newlines)
 void loop() {
-Timer();
+  delay(5);
+  Timer();
 //delay(1000);
 // // verify motors operational
 //   digitalWrite(leftMotorPWMPin, HIGH);
@@ -124,31 +125,28 @@ void Timer() {
   dt = (time - oldTime) / 1000.0;
   oldTime = time;
 
-  currentAngle = 0.96 * (currentAngle + (g.gyro.y+0.01) * dt) + 0.04 * atan2(a.acceleration.x, a.acceleration.z); // +/- 250 deg/sec (4.36332 rad/sec -> data is in rad/sec)
+  currentAngle = currentAngle + (g.gyro.y * RAD_TO_DEG) * dt; // +/- 250 deg/sec (4.36332 rad/sec -> data is in rad/sec)
   // Serial.print("Current Angle:");
   // Serial.println(currentAngle*180/3.14159);
   // Serial.print("sec: ");
   // Serial.println(time/1000);
-  if (currentAngle > 0) {
+  if (currentAngle < 0) {
     BASE_PWM = 500;
-  }
-  else {
+  } else {
     BASE_PWM = -500;
   }
-
-
   
-  error = 2941 * currentAngle;
-  Serial.print("Error: ");
-  Serial.println(error);
+  error = currentAngle;
+  // Serial.print("Error: ");
+  // Serial.println(error);
   //delay(1000);
   errorSum += error;
-  //error = constrain(error, -1500, 1500);
+  // errorSum = constrain(errorSum, -15000, 15000);
   Serial.print("ErrorSum: ");
   Serial.println(errorSum);
   
   //errorSum = constrain(errorSum, -1000.0, 1000.0);
-  PWM = Kp*(error) + Ki*(errorSum)*dt - Kd*(currentAngle-prevAngle)/dt;
+  PWM = BASE_PWM + Kp*(error) + Ki*(errorSum) + Kd*(currentAngle-prevAngle);
  // Serial.print("PWM:");
   //Serial.println(PWM);
   prevAngle = currentAngle;
